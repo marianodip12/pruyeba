@@ -34,21 +34,33 @@ export default function Home() {
     }
   }
 
-  const loadYoutube = () => {
-    const id = youtubeUrl.split("v=")[1]
-    const tag = document.createElement('script')
-    tag.src = "https://www.youtube.com/iframe_api"
-    document.body.appendChild(tag)
+ const loadYoutube = () => {
+  if (typeof window === "undefined") return;
 
-    window.onYouTubeIframeAPIReady = () => {
-      const ytPlayer = new window.YT.Player('yt-player', {
-        height: '360',
-        width: '640',
-        videoId: id,
-      })
-      setPlayer(ytPlayer)
-    }
+  const idMatch = youtubeUrl.match(/v=([^&]+)/);
+  const id = idMatch ? idMatch[1] : null;
+
+  if (!id) return;
+
+  const createPlayer = () => {
+    const ytPlayer = new window.YT.Player('yt-player', {
+      height: '360',
+      width: '640',
+      videoId: id,
+    });
+    setPlayer(ytPlayer);
+  };
+
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = createPlayer;
+  } else {
+    createPlayer();
   }
+};
 
   return (
     <div style={{ padding: 20 }}>
