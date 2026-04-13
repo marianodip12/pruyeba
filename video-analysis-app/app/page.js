@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 
 export default function Home() {
   const videoRef = useRef(null)
@@ -9,12 +9,8 @@ export default function Home() {
 
   const addEvent = (tipo) => {
     let time = 0
-    if (videoRef.current) {
-      time = videoRef.current.currentTime
-    }
-    if (player) {
-      time = player.getCurrentTime()
-    }
+    if (videoRef.current) time = videoRef.current.currentTime
+    if (player) time = player.getCurrentTime()
 
     setEvents(prev => [...prev, {
       id: Date.now().toString(),
@@ -34,33 +30,32 @@ export default function Home() {
     }
   }
 
- const loadYoutube = () => {
-  if (typeof window === "undefined") return;
+  const loadYoutube = () => {
+    if (typeof window === "undefined") return
 
-  const idMatch = youtubeUrl.match(/v=([^&]+)/);
-  const id = idMatch ? idMatch[1] : null;
+    const match = youtubeUrl.match(/v=([^&]+)/)
+    const id = match ? match[1] : null
+    if (!id) return
 
-  if (!id) return;
+    const createPlayer = () => {
+      const ytPlayer = new window.YT.Player('yt-player', {
+        height: '360',
+        width: '640',
+        videoId: id,
+      })
+      setPlayer(ytPlayer)
+    }
 
-  const createPlayer = () => {
-    const ytPlayer = new window.YT.Player('yt-player', {
-      height: '360',
-      width: '640',
-      videoId: id,
-    });
-    setPlayer(ytPlayer);
-  };
+    if (!window.YT) {
+      const tag = document.createElement('script')
+      tag.src = "https://www.youtube.com/iframe_api"
+      document.body.appendChild(tag)
 
-  if (!window.YT) {
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(tag);
-
-    window.onYouTubeIframeAPIReady = createPlayer;
-  } else {
-    createPlayer();
+      window.onYouTubeIframeAPIReady = createPlayer
+    } else {
+      createPlayer()
+    }
   }
-};
 
   return (
     <div style={{ padding: 20 }}>
